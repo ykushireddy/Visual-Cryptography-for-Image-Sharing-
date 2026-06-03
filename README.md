@@ -1,21 +1,66 @@
-# Visual-Cryptography-for-Image-Sharing-
-Secure image sharing system using visual cryptography techniques for image encryption and reconstruction.
-This is a Computer Networks and Security (CNS) mini-project that demonstrates a 2-out-of-2 Visual Cryptography scheme.
+# Visual Cryptography for Secret Image Sharing
 
-Problem Statement
-In secure communication, transmitting sensitive visual data over untrusted channels poses a risk of interception. Traditional encryption algorithms require computational power to decrypt data. The problem addressed in this project is to securely share a secret image such that the encrypted shares reveal absolutely no information when viewed individually, and can be decrypted purely by the human visual system (or simulated digital overlay) without any computational decryption algorithms.
+## Overview
 
-Objective
-To implement a 2-out-of-2 visual cryptography algorithm.
-To demonstrate how an image can be split into two random-noise shares.
-To show that only the authorized combination (overlaying both shares) reveals the original secret.
-Architecture & Workflow
-Input: User uploads a grayscale or black-and-white image.
-Binarization: The image is thresholded into strict black (0) and white (255) pixels using OpenCV (Otsu's method).
-Encryption (Share Generation):
-The algorithm uses a 2x2 pixel expansion.
-For every White pixel, Share 1 and Share 2 receive the identical random pattern (2 white, 2 black sub-pixels).
-For every Black pixel, Share 1 receives a random pattern, and Share 2 receives the inverted pattern.
-Decryption (Reconstruction):
-The two shares are overlaid using a Bitwise AND operation, which perfectly simulates stacking two physical transparent sheets.
-Light passes only where both sheets are transparent (white).
+This project implements a 2-out-of-2 Visual Cryptography scheme that securely splits a secret image into two encrypted shares. Individually, the shares reveal no information about the original image. The secret image can only be reconstructed when both shares are combined.
+
+## Features
+
+* 2-out-of-2 Visual Cryptography implementation
+* Secure image share generation
+* Image reconstruction through share overlay
+* No information leakage from individual shares
+* Web-based interface using Flask
+
+## Technologies Used
+
+* Python
+* Flask
+* OpenCV
+* NumPy
+
+## Workflow
+
+1. Upload a grayscale or black-and-white image.
+2. Convert the image into a binary format.
+3. Generate two encrypted image shares.
+4. Overlay both shares to reconstruct the original image.
+
+## Project Structure
+
+```text
+├── app.py
+├── templates/
+├── static/
+├── uploads/
+├── shares/
+├── requirements.txt
+└── README.md
+```
+
+## Installation
+
+```bash
+pip install -r requirements.txt
+python app.py
+```
+
+Open:
+
+```text
+http://localhost:5000
+```
+
+## Applications
+
+* Secure image sharing
+* Confidential document transmission
+* Information security systems
+* Visual authentication mechanisms
+
+## Future Enhancements
+
+* Color image support
+* Multi-share cryptography schemes
+* Cloud deployment
+* Enhanced user interface
