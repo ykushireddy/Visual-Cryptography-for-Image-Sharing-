@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visual Cryptography - CNS Project</title>
+    <!-- Simple embedded CSS for styling -->
+    <style>
+        :root {
+            --primary: #2563eb;
+            --bg-color: #f3f4f6;
+            --card-bg: #ffffff;
+            --text: #1f2937;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text);
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        p.subtitle {
+            text-align: center;
+            color: #6b7280;
+            margin-bottom: 30px;
+        }
+
+        .upload-section {
+            border: 2px dashed #cbd5e1;
+            padding: 40px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 30px;
+            background: #f8fafc;
+        }
+
+        input[type="file"] {
+            margin-bottom: 15px;
+        }
+
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background-color: #1d4ed8;
+        }
+
+        .results-section {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .image-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .image-card {
+            flex: 1;
+            background: #f1f5f9;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .image-card img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            margin-top: 10px;
+            background: white;
+            /* to show transparency/black & white clearly */
+
+            /* FORCE NEAREST-NEIGHBOR RENDERING */
+            /* Prevents the browser from smoothing/anti-aliasing 1-pixel noise into gray blocks */
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+        }
+
+        .reconstruct-section {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+        }
+    </style>
+</head>
+
+<body>
+
+    {% if error_msg %}
+    <div
+        style="background-color: #fee2e2; color: #b91c1c; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; font-weight: bold; width: 100%; max-width: 900px; box-sizing: border-box; border: 1px solid #ef4444;">
+        ⚠️ {{ error_msg }}
+    </div>
+    {% endif %}
+
+    <div class="container">
+        <h1>Visual Cryptography</h1>
+        <p class="subtitle">Secure 2-out-of-2 Secret Image Sharing Scheme</p>
+
+        <!-- Upload Form -->
+        <div class="upload-section">
+            <h3>Step 1: Upload Secret Image</h3>
+            <p>Upload a black & white or grayscale image to encrypt.</p>
+            <p
+                style="color: #2563eb; font-size: 14px; font-weight: 500; background: #e0e7ff; display: inline-block; padding: 5px 15px; border-radius: 20px;">
+                Recommendation: Upload simple text, basic logos, or QR codes. Complex photographs will be rejected to
+                preserve reconstruction clarity.</p>
+            <form action="/" method="POST" enctype="multipart/form-data" style="margin-top: 15px;">
+                <input type="file" name="secret_image" accept=".png, .jpg, .jpeg" required>
+                <br>
+                <button type="submit">Encrypt & Generate Shares</button>
+            </form>
+        </div>
+
+        <!-- Results Area (Only shows if shares were generated) -->
+        {% if share1_img and share2_img %}
+        <div class="results-section">
+
+            <div class="image-row">
+                <div class="image-card">
+                    <h3>Original Secret</h3>
+                    <img src="{{ url_for('static', filename='uploads/' + secret_img) }}" alt="Original Image">
+                </div>
+            </div>
+
+            <h3>Step 2: Generated Shares</h3>
+            <p style="text-align:center; color:#6b7280; margin-top:-10px;">Notice how each individual share appears as
+                completely random noise.</p>
+
+            <div class="image-row">
+                <div class="image-card">
+                    <h3>Share 1</h3>
+                    <img src="{{ url_for('static', filename='uploads/' + share1_img) }}" alt="Share 1">
+                </div>
+                <div class="image-card">
+                    <h3>Share 2</h3>
+                    <img src="{{ url_for('static', filename='uploads/' + share2_img) }}" alt="Share 2">
+                </div>
+            </div>
+
+            <!-- Reconstruction Form -->
+            {% if not reconstructed_img %}
+            <div class="reconstruct-section">
+                <h3>Step 3: Overlay Shares</h3>
+                <p>Simulate the physical stacking of both transparencies.</p>
+                <form action="/reconstruct" method="POST">
+                    <!-- Hidden inputs to pass the filenames back to the server -->
+                    <input type="hidden" name="share1" value="{{ share1_img }}">
+                    <input type="hidden" name="share2" value="{{ share2_img }}">
+                    <button type="submit" style="background-color: #10b981;">Reconstruct Secret</button>
+                </form>
+            </div>
+            {% endif %}
+
+            <!-- Reconstructed Image Area -->
+            {% if reconstructed_img %}
+            <div class="reconstruct-section">
+                <h3>Reconstructed Image</h3>
+                <p style="color:#10b981;">Successfully reconstructed by overlaying Share 1 and Share 2.</p>
+                <div class="image-row" style="justify-content: center;">
+                    <div class="image-card" style="max-width: 50%;">
+                        <img src="{{ url_for('static', filename='uploads/' + reconstructed_img) }}"
+                            alt="Reconstructed Image">
+                    </div>
+                </div>
+                <div style="margin-top: 20px;">
+                    <a href="/" style="text-decoration: none;"><button style="background-color: #6b7280;">Encrypt
+                            Another Image</button></a>
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
+        {% endif %}
+
+    </div>
+
+</body>
+
+</html>
